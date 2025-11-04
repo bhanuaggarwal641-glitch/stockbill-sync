@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action_type: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          new_value_json: Json | null
+          old_value_json: Json | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          new_value_json?: Json | null
+          old_value_json?: Json | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          new_value_json?: Json | null
+          old_value_json?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_ledgers: {
+        Row: {
+          balance_amount: number
+          created_at: string
+          due_date: string | null
+          id: string
+          invoice_id: string
+          invoice_type: string
+          paid_amount: number
+          party_id: string
+          party_type: string
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          balance_amount: number
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          invoice_id: string
+          invoice_type: string
+          paid_amount?: number
+          party_id: string
+          party_type: string
+          status?: string
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          balance_amount?: number
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          invoice_id?: string
+          invoice_type?: string
+          paid_amount?: number
+          party_id?: string
+          party_type?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           address: string | null
@@ -133,6 +214,229 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      purchase_invoices: {
+        Row: {
+          created_at: string
+          created_by_user_id: string
+          grand_total: number
+          gst_total: number
+          id: string
+          is_gst: boolean
+          payment_mode: Database["public"]["Enums"]["payment_mode"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          purchase_date: string
+          purchase_number: string
+          sub_total: number
+          supplier_id: string
+          supplier_invoice_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_user_id: string
+          grand_total?: number
+          gst_total?: number
+          id?: string
+          is_gst?: boolean
+          payment_mode?: Database["public"]["Enums"]["payment_mode"]
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          purchase_date?: string
+          purchase_number: string
+          sub_total?: number
+          supplier_id: string
+          supplier_invoice_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by_user_id?: string
+          grand_total?: number
+          gst_total?: number
+          id?: string
+          is_gst?: boolean
+          payment_mode?: Database["public"]["Enums"]["payment_mode"]
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          purchase_date?: string
+          purchase_number?: string
+          sub_total?: number
+          supplier_id?: string
+          supplier_invoice_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_invoices_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_items: {
+        Row: {
+          created_at: string
+          gst_rate: number
+          id: string
+          line_total: number
+          product_id: string
+          purchase_invoice_id: string
+          qty: number
+          unit_cost: number
+        }
+        Insert: {
+          created_at?: string
+          gst_rate?: number
+          id?: string
+          line_total: number
+          product_id: string
+          purchase_invoice_id: string
+          qty: number
+          unit_cost: number
+        }
+        Update: {
+          created_at?: string
+          gst_rate?: number
+          id?: string
+          line_total?: number
+          product_id?: string
+          purchase_invoice_id?: string
+          qty?: number
+          unit_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_items_purchase_invoice_id_fkey"
+            columns: ["purchase_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_invoices: {
+        Row: {
+          amount_paid: number
+          balance_due: number
+          created_at: string
+          created_by_user_id: string
+          customer_id: string | null
+          grand_total: number
+          gst_total: number
+          id: string
+          invoice_date: string
+          invoice_number: string
+          payment_mode: Database["public"]["Enums"]["payment_mode"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          round_off: number
+          sub_total: number
+          updated_at: string
+        }
+        Insert: {
+          amount_paid?: number
+          balance_due?: number
+          created_at?: string
+          created_by_user_id: string
+          customer_id?: string | null
+          grand_total?: number
+          gst_total?: number
+          id?: string
+          invoice_date?: string
+          invoice_number: string
+          payment_mode?: Database["public"]["Enums"]["payment_mode"]
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          round_off?: number
+          sub_total?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_paid?: number
+          balance_due?: number
+          created_at?: string
+          created_by_user_id?: string
+          customer_id?: string | null
+          grand_total?: number
+          gst_total?: number
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          payment_mode?: Database["public"]["Enums"]["payment_mode"]
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          round_off?: number
+          sub_total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_items: {
+        Row: {
+          created_at: string
+          discount: number
+          gst_rate: number
+          id: string
+          is_tax_inclusive: boolean
+          line_total: number
+          product_id: string
+          qty: number
+          sales_invoice_id: string
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          discount?: number
+          gst_rate?: number
+          id?: string
+          is_tax_inclusive?: boolean
+          line_total: number
+          product_id: string
+          qty: number
+          sales_invoice_id: string
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          discount?: number
+          gst_rate?: number
+          id?: string
+          is_tax_inclusive?: boolean
+          line_total?: number
+          product_id?: string
+          qty?: number
+          sales_invoice_id?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_items_sales_invoice_id_fkey"
+            columns: ["sales_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "sales_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppliers: {
         Row: {

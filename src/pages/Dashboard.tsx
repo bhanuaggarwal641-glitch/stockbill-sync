@@ -73,10 +73,10 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <Button 
             className="h-20 text-lg font-semibold bg-gradient-primary shadow-elegant hover:shadow-glow transition-all"
-            onClick={() => navigate("/pos")}
+            onClick={() => navigate("/sales/new")}
           >
             <Receipt className="w-6 h-6 mr-2" />
             New Sale
@@ -92,7 +92,7 @@ const Dashboard = () => {
           <Button 
             variant="outline"
             className="h-20 text-lg font-semibold border-2"
-            onClick={() => navigate("/purchase-gst")}
+            onClick={() => navigate("/purchases/gst")}
           >
             <Plus className="w-6 h-6 mr-2" />
             GST Purchase
@@ -100,10 +100,18 @@ const Dashboard = () => {
           <Button 
             variant="outline"
             className="h-20 text-lg font-semibold border-2"
-            onClick={() => navigate("/purchase-non-gst")}
+            onClick={() => navigate("/purchases/non-gst")}
           >
             <Plus className="w-6 h-6 mr-2" />
             Non-GST Purchase
+          </Button>
+          <Button 
+            variant="outline"
+            className="h-20 text-lg font-semibold border-2"
+            onClick={() => navigate("/users")}
+          >
+            <Users className="w-6 h-6 mr-2" />
+            Users
           </Button>
         </div>
 
