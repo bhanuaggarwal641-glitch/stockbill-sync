@@ -29,18 +29,31 @@ const UserManagement = () => {
   }, []);
 
   const fetchUsers = async () => {
-    const { data, error } = await supabase
+    const { data: profilesData, error: profilesError } = await supabase
       .from("profiles")
-      .select(`
-        *,
-        user_roles (role)
-      `);
+      .select("*");
     
-    if (error) {
+    if (profilesError) {
       toast.error("Failed to load users");
-    } else {
-      setUsers(data || []);
+      return;
     }
+
+    const { data: rolesData, error: rolesError } = await supabase
+      .from("user_roles")
+      .select("*");
+    
+    if (rolesError) {
+      toast.error("Failed to load roles");
+      return;
+    }
+
+    // Merge profiles with their roles
+    const usersWithRoles = profilesData?.map(profile => ({
+      ...profile,
+      user_roles: rolesData?.filter(role => role.user_id === profile.id) || []
+    })) || [];
+
+    setUsers(usersWithRoles);
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
