@@ -13,6 +13,8 @@ import NewSale from "./pages/NewSale";
 import GstPurchase from "./pages/GstPurchase";
 import NonGstPurchase from "./pages/NonGstPurchase";
 import UserManagement from "./pages/UserManagement";
+import Customers from "./pages/Customers";
+import Suppliers from "./pages/Suppliers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +37,8 @@ const App = () => (
             <Route path="/purchases/gst" element={<GstPurchase />} />
             <Route path="/purchases/non-gst" element={<NonGstPurchase />} />
             <Route path="/users" element={<UserManagement />} />
+            <Route path="/customers" element={<Customers />} />
+            <Route path="/suppliers" element={<Suppliers />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
