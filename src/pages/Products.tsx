@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Plus, Search, Pencil, Package } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +15,7 @@ const Products = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [gstFilter, setGstFilter] = useState<"all" | "gst" | "non-gst">("all");
 
   useEffect(() => {
     fetchProducts();
@@ -34,12 +36,21 @@ const Products = () => {
     setLoading(false);
   };
 
-  const filteredProducts = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.barcode?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProducts = products.filter(product => {
+    const search = searchQuery.toLowerCase();
+    const matchesSearch = (
+      product.name.toLowerCase().includes(search) ||
+      product.sku.toLowerCase().includes(search) ||
+      (product.barcode && product.barcode.toLowerCase().includes(search))
+    );
+
+    const matchesGST = 
+      gstFilter === "all" ? true :
+      gstFilter === "gst" ? product.gst_applicability === "GST" :
+      product.gst_applicability === "Non-GST";
+
+    return matchesSearch && matchesGST;
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -73,14 +84,26 @@ const Products = () => {
                 <CardTitle>Product Catalog</CardTitle>
                 <CardDescription>Browse and manage all products</CardDescription>
               </div>
-              <div className="relative w-64">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+              <div className="flex gap-4">
+                <Select value={gstFilter} onValueChange={(value: any) => setGstFilter(value)}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Products</SelectItem>
+                    <SelectItem value="gst">GST Products</SelectItem>
+                    <SelectItem value="non-gst">Non-GST Products</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </div>
             </div>
           </CardHeader>

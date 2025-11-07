@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import ProductForm from "./pages/ProductForm";
 import NewSale from "./pages/NewSale";
+import Sales from "./pages/Sales";
 import GstPurchase from "./pages/GstPurchase";
 import NonGstPurchase from "./pages/NonGstPurchase";
 import UserManagement from "./pages/UserManagement";
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/products/new" element={<ProductForm />} />
             <Route path="/products/:id" element={<ProductForm />} />
             <Route path="/sales/new" element={<NewSale />} />
+            <Route path="/sales" element={<Sales />} />
             <Route path="/purchases/gst" element={<GstPurchase />} />
             <Route path="/purchases/non-gst" element={<NonGstPurchase />} />
             <Route path="/users" element={<UserManagement />} />
