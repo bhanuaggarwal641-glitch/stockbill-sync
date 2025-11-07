@@ -30,7 +30,7 @@ const NewSale = () => {
   const [customers, setCustomers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState("walk-in");
   const [paymentMode, setPaymentMode] = useState<"Cash" | "Online" | "Credit">("Cash");
   const [amountPaid, setAmountPaid] = useState("");
 
@@ -135,7 +135,7 @@ const NewSale = () => {
         .insert([
           {
             invoice_number: invoiceNumber,
-            customer_id: selectedCustomer || null,
+            customer_id: selectedCustomer === "walk-in" ? null : selectedCustomer,
             sub_total: subTotal,
             gst_total: gstTotal,
             grand_total: grandTotal,
@@ -267,7 +267,7 @@ const NewSale = () => {
                     <SelectValue placeholder="Walk-in Customer" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Walk-in Customer</SelectItem>
+                    <SelectItem value="walk-in">Walk-in Customer</SelectItem>
                     {customers.map((customer) => (
                       <SelectItem key={customer.id} value={customer.id}>
                         {customer.name}
