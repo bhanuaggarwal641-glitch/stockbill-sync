@@ -16,6 +16,11 @@ import NonGstPurchase from "./pages/NonGstPurchase";
 import UserManagement from "./pages/UserManagement";
 import Customers from "./pages/Customers";
 import Suppliers from "./pages/Suppliers";
+import Purchases from "./pages/Purchases";
+import CreditOutstanding from "./pages/CreditOutstanding";
+import TodaySales from "./pages/TodaySales";
+import LastMonthSales from "./pages/LastMonthSales";
+import LowStock from "./pages/LowStock";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,9 +43,14 @@ const App = () => (
             <Route path="/sales" element={<Sales />} />
             <Route path="/purchases/gst" element={<GstPurchase />} />
             <Route path="/purchases/non-gst" element={<NonGstPurchase />} />
+            <Route path="/purchases" element={<Purchases />} />
             <Route path="/users" element={<UserManagement />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/suppliers" element={<Suppliers />} />
+            <Route path="/credit-outstanding" element={<CreditOutstanding />} />
+            <Route path="/today-sales" element={<TodaySales />} />
+            <Route path="/last-month-sales" element={<LastMonthSales />} />
+            <Route path="/low-stock" element={<LowStock />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

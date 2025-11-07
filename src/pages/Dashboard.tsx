@@ -222,7 +222,10 @@ const Dashboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="shadow-sm hover:shadow-md transition-shadow">
+          <Card 
+            className="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => navigate("/today-sales")}
+          >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Today's Sales
@@ -235,7 +238,10 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm hover:shadow-md transition-shadow">
+          <Card 
+            className="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => navigate("/last-month-sales")}
+          >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Sales Last Month
@@ -248,7 +254,10 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm hover:shadow-md transition-shadow">
+          <Card 
+            className="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => navigate("/credit-outstanding")}
+          >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Credit Outstanding
@@ -261,7 +270,10 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm hover:shadow-md transition-shadow">
+          <Card 
+            className="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => navigate("/low-stock")}
+          >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Low Stock Items
@@ -314,8 +326,15 @@ const Dashboard = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Recent Purchases</CardTitle>
-              <CardDescription>Latest stock purchases</CardDescription>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Recent Purchases</CardTitle>
+                  <CardDescription>Latest stock purchases</CardDescription>
+                </div>
+                <Button variant="outline" onClick={() => navigate("/purchases")}>
+                  View All
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-center py-8 text-muted-foreground">

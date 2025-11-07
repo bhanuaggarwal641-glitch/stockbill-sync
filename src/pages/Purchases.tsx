@@ -10,117 +10,67 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 
-type SalesInvoice = {
+type PurchaseInvoice = {
   id: string;
-  invoice_number: string;
-  invoice_date: string;
-  customer_id: string | null;
+  purchase_number: string;
+  purchase_date: string;
+  supplier_id: string;
   grand_total: number;
   payment_mode: string;
   payment_status: string;
-  customers: { name: string } | null;
+  is_gst: boolean;
+  suppliers: { name: string } | null;
 };
 
-type SalesItem = {
-  id: string;
-  sales_invoice_id: string;
-  product_id: string;
-  qty: number;
-  unit_price: number;
-  gst_rate: number;
-  line_total: number;
-  products: {
-    name: string;
-    gst_applicability: string;
-  };
-};
-
-const Sales = () => {
+const Purchases = () => {
   const navigate = useNavigate();
-  const [sales, setSales] = useState<SalesInvoice[]>([]);
+  const [purchases, setPurchases] = useState<PurchaseInvoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [gstFilter, setGstFilter] = useState<"all" | "gst" | "non-gst">("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
-    fetchSales();
+    fetchPurchases();
   }, []);
 
-  const fetchSales = async () => {
+  const fetchPurchases = async () => {
     try {
       const { data, error } = await supabase
-        .from("sales_invoices")
+        .from("purchase_invoices")
         .select(`
           *,
-          customers (name)
+          suppliers (name)
         `)
-        .order("invoice_date", { ascending: false });
+        .order("purchase_date", { ascending: false });
 
       if (error) throw error;
-      setSales(data || []);
+      setPurchases(data || []);
     } catch (error: any) {
-      toast.error("Failed to load sales");
+      toast.error("Failed to load purchases");
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchSalesItems = async (invoiceId: string): Promise<SalesItem[]> => {
-    const { data, error } = await supabase
-      .from("sales_items")
-      .select(`
-        *,
-        products (name, gst_applicability)
-      `)
-      .eq("sales_invoice_id", invoiceId);
-
-    if (error) {
-      console.error(error);
-      return [];
-    }
-    return data || [];
-  };
-
-  const filterSalesByGST = async (sale: SalesInvoice): Promise<boolean> => {
-    if (gstFilter === "all") return true;
-
-    const items = await fetchSalesItems(sale.id);
-    
-    if (gstFilter === "gst") {
-      return items.some(item => item.products.gst_applicability === "GST");
-    } else {
-      return items.some(item => item.products.gst_applicability === "Non-GST");
-    }
-  };
-
-  const filteredSales = sales.filter(sale => {
+  const filteredPurchases = purchases.filter(purchase => {
     const matchesSearch = 
-      sale.invoice_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      sale.customers?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+      purchase.purchase_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      purchase.suppliers?.name?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    return matchesSearch;
+    const matchesGST = 
+      gstFilter === "all" ? true :
+      gstFilter === "gst" ? purchase.is_gst :
+      !purchase.is_gst;
+    
+    const purchaseDate = new Date(purchase.purchase_date);
+    const matchesStartDate = !startDate || purchaseDate >= new Date(startDate);
+    const matchesEndDate = !endDate || purchaseDate <= new Date(endDate);
+    
+    return matchesSearch && matchesGST && matchesStartDate && matchesEndDate;
   });
-
-  const [displaySales, setDisplaySales] = useState<SalesInvoice[]>([]);
-
-  useEffect(() => {
-    const filterSales = async () => {
-      if (gstFilter === "all") {
-        setDisplaySales(filteredSales);
-      } else {
-        const filtered = [];
-        for (const sale of filteredSales) {
-          if (await filterSalesByGST(sale)) {
-            filtered.push(sale);
-          }
-        }
-        setDisplaySales(filtered);
-      }
-    };
-    
-    filterSales();
-  }, [filteredSales, gstFilter]);
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -130,12 +80,12 @@ const Sales = () => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-3xl font-bold text-foreground">Sales History</h1>
+          <h1 className="text-3xl font-bold text-foreground">Purchase History</h1>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>All Sales Invoices</CardTitle>
+            <CardTitle>All Purchase Invoices</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-4 mb-6">
@@ -143,7 +93,7 @@ const Sales = () => {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by invoice or customer..."
+                    placeholder="Search by invoice or supplier..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -154,11 +104,29 @@ const Sales = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Sales</SelectItem>
-                    <SelectItem value="gst">GST Sales Only</SelectItem>
-                    <SelectItem value="non-gst">Non-GST Sales Only</SelectItem>
+                    <SelectItem value="all">All Purchases</SelectItem>
+                    <SelectItem value="gst">GST Purchases Only</SelectItem>
+                    <SelectItem value="non-gst">Non-GST Purchases Only</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <Input
+                    type="date"
+                    placeholder="Start Date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                </div>
+                <div className="flex-1">
+                  <Input
+                    type="date"
+                    placeholder="End Date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
 
@@ -166,34 +134,40 @@ const Sales = () => {
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
               </div>
-            ) : displaySales.length === 0 ? (
+            ) : filteredPurchases.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>No sales found</p>
+                <p>No purchases found</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Invoice #</TableHead>
+                    <TableHead>Purchase #</TableHead>
                     <TableHead>Date</TableHead>
-                    <TableHead>Customer</TableHead>
+                    <TableHead>Supplier</TableHead>
+                    <TableHead>Type</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Payment Mode</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {displaySales.map((sale) => (
-                    <TableRow key={sale.id}>
-                      <TableCell className="font-medium">{sale.invoice_number}</TableCell>
-                      <TableCell>{new Date(sale.invoice_date).toLocaleDateString()}</TableCell>
-                      <TableCell>{sale.customers?.name || "Walk-in Customer"}</TableCell>
-                      <TableCell>₹{sale.grand_total.toFixed(2)}</TableCell>
-                      <TableCell>{sale.payment_mode}</TableCell>
+                  {filteredPurchases.map((purchase) => (
+                    <TableRow key={purchase.id}>
+                      <TableCell className="font-medium">{purchase.purchase_number}</TableCell>
+                      <TableCell>{new Date(purchase.purchase_date).toLocaleDateString()}</TableCell>
+                      <TableCell>{purchase.suppliers?.name || "N/A"}</TableCell>
                       <TableCell>
-                        <Badge variant={sale.payment_status === "Paid" ? "default" : "destructive"}>
-                          {sale.payment_status}
+                        <Badge variant={purchase.is_gst ? "default" : "secondary"}>
+                          {purchase.is_gst ? "GST" : "Non-GST"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>₹{purchase.grand_total.toFixed(2)}</TableCell>
+                      <TableCell>{purchase.payment_mode}</TableCell>
+                      <TableCell>
+                        <Badge variant={purchase.payment_status === "Paid" ? "default" : "destructive"}>
+                          {purchase.payment_status}
                         </Badge>
                       </TableCell>
                     </TableRow>
@@ -208,4 +182,4 @@ const Sales = () => {
   );
 };
 
-export default Sales;
+export default Purchases;
