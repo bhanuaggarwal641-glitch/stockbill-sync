@@ -228,27 +228,42 @@ const NewSale = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
-                {filteredProducts.map((product) => (
-                  <Card
-                    key={product.id}
-                    className="cursor-pointer hover:bg-accent transition-colors"
-                    onClick={() => addToCart(product)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <p className="font-medium">{product.name}</p>
-                          <p className="text-sm text-muted-foreground">{product.sku}</p>
-                          <p className="text-sm text-muted-foreground">Stock: {product.quantity_in_stock}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold">₹{product.price}</p>
-                          <p className="text-xs text-muted-foreground">{product.gst_applicability}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {/* Group products by category */}
+                {Object.entries(
+                  filteredProducts.reduce((acc: Record<string, any[]>, product: any) => {
+                    const category = product.category || "Uncategorized";
+                    if (!acc[category]) acc[category] = [];
+                    acc[category].push(product);
+                    return acc;
+                  }, {} as Record<string, any[]>)
+                ).map(([category, categoryProducts]: [string, any[]]) => (
+                  <div key={category}>
+                    <h3 className="font-semibold text-sm text-muted-foreground mb-2">{category}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {categoryProducts.map((product) => (
+                        <Card
+                          key={product.id}
+                          className="cursor-pointer hover:bg-accent transition-colors"
+                          onClick={() => addToCart(product)}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <p className="font-medium">{product.name}</p>
+                                <p className="text-sm text-muted-foreground">{product.sku}</p>
+                                <p className="text-sm text-muted-foreground">Stock: {product.quantity_in_stock}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-bold">₹{product.price}</p>
+                                <p className="text-xs text-muted-foreground">{product.gst_applicability}</p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             </CardContent>

@@ -21,6 +21,7 @@ import CreditOutstanding from "./pages/CreditOutstanding";
 import TodaySales from "./pages/TodaySales";
 import LastMonthSales from "./pages/LastMonthSales";
 import LowStock from "./pages/LowStock";
+import CreditPayment from "./pages/CreditPayment";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +52,8 @@ const App = () => (
             <Route path="/today-sales" element={<TodaySales />} />
             <Route path="/last-month-sales" element={<LastMonthSales />} />
             <Route path="/low-stock" element={<LowStock />} />
+            <Route path="/user-management" element={<UserManagement />} />
+            <Route path="/credit-payment" element={<CreditPayment />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

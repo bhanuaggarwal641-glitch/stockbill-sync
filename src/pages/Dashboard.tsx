@@ -15,7 +15,9 @@ import {
   Plus,
   Receipt,
   UserPlus,
-  Truck
+  Truck,
+  UserCog,
+  CreditCard
 } from "lucide-react";
 
 const Dashboard = () => {
@@ -197,10 +199,18 @@ const Dashboard = () => {
           <Button 
             variant="outline"
             className="h-20 text-lg font-semibold border-2"
-            onClick={() => navigate("/users")}
+            onClick={() => navigate("/user-management")}
           >
-            <Users className="w-6 h-6 mr-2" />
+            <UserCog className="w-4 h-4 mr-2" />
             Users
+          </Button>
+          <Button 
+            variant="outline"
+            className="h-20 text-lg font-semibold border-2"
+            onClick={() => navigate("/credit-payment")}
+          >
+            <CreditCard className="w-4 h-4 mr-2" />
+            Credit Payment
           </Button>
           <Button 
             variant="outline"

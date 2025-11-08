@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,7 @@ const ProductForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+  const [loadingProduct, setLoadingProduct] = useState(!!id);
   
   const [formData, setFormData] = useState({
     sku: "",
@@ -32,6 +33,49 @@ const ProductForm = () => {
     default_gst_rate: "",
   });
 
+  useEffect(() => {
+    if (id) {
+      fetchProduct();
+    }
+  }, [id]);
+
+  const fetchProduct = async () => {
+    try {
+      setLoadingProduct(true);
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setFormData({
+          sku: data.sku || "",
+          barcode: data.barcode || "",
+          name: data.name || "",
+          description: data.description || "",
+          category: data.category || "",
+          size: data.size || "",
+          thickness: data.thickness || "",
+          unit: data.unit || "pcs",
+          price: data.price?.toString() || "",
+          cost_price: data.cost_price?.toString() || "",
+          quantity_in_stock: data.quantity_in_stock?.toString() || "",
+          reorder_level: data.reorder_level?.toString() || "",
+          gst_applicability: data.gst_applicability || "GST",
+          default_gst_rate: data.default_gst_rate?.toString() || "",
+        });
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to load product");
+      navigate("/products");
+    } finally {
+      setLoadingProduct(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -46,18 +90,32 @@ const ProductForm = () => {
         default_gst_rate: parseFloat(formData.default_gst_rate) || 0,
       };
 
-      const { error } = await supabase.from("products").insert([productData]);
-
-      if (error) throw error;
-
-      toast.success("Product created successfully");
+      let error;
+      
+      if (id) {
+        ({ error } = await supabase.from("products").update(productData).eq("id", id));
+        if (error) throw error;
+        toast.success("Product updated successfully");
+      } else {
+        ({ error } = await supabase.from("products").insert([productData]));
+        if (error) throw error;
+        toast.success("Product created successfully");
+      }
       navigate("/products");
     } catch (error: any) {
-      toast.error(error.message || "Failed to create product");
+      toast.error(error.message || `Failed to ${id ? 'update' : 'create'} product`);
     } finally {
       setLoading(false);
     }
   };
+
+  if (loadingProduct) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Loading product...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

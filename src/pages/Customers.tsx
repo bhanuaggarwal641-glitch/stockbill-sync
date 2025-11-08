@@ -29,16 +29,41 @@ const Customers = () => {
   }, []);
 
   const fetchCustomers = async () => {
-    const { data, error } = await supabase
+    // Fetch customers
+    const { data: customersData, error: customersError } = await supabase
       .from("customers")
       .select("*")
       .order("created_at", { ascending: false });
     
-    if (error) {
+    if (customersError) {
       toast.error("Failed to load customers");
-    } else {
-      setCustomers(data || []);
+      return;
     }
+
+    // Fetch credit ledgers for each customer
+    const { data: creditData, error: creditError } = await supabase
+      .from("credit_ledgers")
+      .select("party_id, balance_amount")
+      .eq("party_type", "customer");
+
+    if (creditError) {
+      console.error("Failed to load credit data:", creditError);
+    }
+
+    // Calculate total credit for each customer
+    const customerCredits = creditData?.reduce((acc, credit) => {
+      if (!acc[credit.party_id]) acc[credit.party_id] = 0;
+      acc[credit.party_id] += parseFloat(credit.balance_amount as any);
+      return acc;
+    }, {} as Record<string, number>) || {};
+
+    // Merge customers with their credit amounts
+    const customersWithCredit = customersData?.map(customer => ({
+      ...customer,
+      creditAmount: customerCredits[customer.id] || 0
+    })) || [];
+
+    setCustomers(customersWithCredit);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -211,6 +236,7 @@ const Customers = () => {
                   <TableHead>Phone</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>GSTIN</TableHead>
+                  <TableHead>Credit Amount</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -221,6 +247,11 @@ const Customers = () => {
                     <TableCell>{customer.phone || "-"}</TableCell>
                     <TableCell>{customer.email || "-"}</TableCell>
                     <TableCell>{customer.gstin || "-"}</TableCell>
+                    <TableCell>
+                      <span className={customer.creditAmount > 0 ? "text-destructive font-medium" : ""}>
+                        ₹{customer.creditAmount.toFixed(2)}
+                      </span>
+                    </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button variant="ghost" size="sm" onClick={() => handleEdit(customer)}>
