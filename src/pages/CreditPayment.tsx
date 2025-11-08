@@ -43,7 +43,9 @@ const CreditPayment = () => {
       .order("created_at", { ascending: false });
 
     if (error) {
-      toast.error("Failed to load credit ledgers");
+      console.error("Credit ledger error:", error);
+      toast.error("Failed to load credit ledgers: " + error.message);
+      setCreditLedgers([]);
     } else {
       setCreditLedgers(data || []);
     }

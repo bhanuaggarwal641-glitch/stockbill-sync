@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, Plus, Trash2, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,17 +60,6 @@ const NewSale = () => {
 
   const addToCart = (product: any) => {
     const existing = cart.find((item) => item.product_id === product.id);
-    
-    // Check for GST/Non-GST mixing
-    if (cart.length > 0) {
-      const cartHasGST = cart.some((item) => item.gst_applicability === "GST");
-      const productIsGST = product.gst_applicability === "GST";
-      
-      if (cartHasGST !== productIsGST) {
-        toast.error("Cannot mix GST and Non-GST items in the same invoice. Create separate invoices.");
-        return;
-      }
-    }
 
     if (existing) {
       updateCartItem(product.id, existing.qty + 1);

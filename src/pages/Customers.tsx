@@ -44,7 +44,8 @@ const Customers = () => {
     const { data: creditData, error: creditError } = await supabase
       .from("credit_ledgers")
       .select("party_id, balance_amount")
-      .eq("party_type", "customer");
+      .eq("party_type", "customer")
+      .gt("balance_amount", 0);
 
     if (creditError) {
       console.error("Failed to load credit data:", creditError);
