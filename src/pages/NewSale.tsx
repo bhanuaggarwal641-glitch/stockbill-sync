@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Plus, Trash2, Search } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Search, Camera, FileDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { BarcodeScanner } from "@/components/BarcodeScanner";
+import { generateSalesInvoicePDF } from "@/lib/pdfExport";
 
 interface CartItem {
   product_id: string;
@@ -34,6 +37,7 @@ const NewSale = () => {
   const [selectedCustomer, setSelectedCustomer] = useState("walk-in");
   const [paymentMode, setPaymentMode] = useState<"Cash" | "Online" | "Credit">("Cash");
   const [amountPaid, setAmountPaid] = useState("");
+  const [showScanner, setShowScanner] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -56,6 +60,21 @@ const NewSale = () => {
     } else {
       setCustomers(data || []);
     }
+  };
+
+  const handleBarcodeScanned = (barcode: string) => {
+    const product = products.find(
+      (p) => p.barcode?.toLowerCase() === barcode.toLowerCase()
+    );
+    
+    if (product) {
+      addToCart(product);
+      toast.success(`Added ${product.name} to cart`);
+    } else {
+      toast.error("Product not found");
+    }
+    
+    setShowScanner(false);
   };
 
   const addToCart = (product: any) => {
@@ -167,11 +186,58 @@ const NewSale = () => {
       }
 
       toast.success("Sale created successfully");
+      
+      // Generate PDF
+      await generateAndDownloadPDF(invoice, cart);
+      
       navigate("/dashboard");
     } catch (error: any) {
       toast.error(error.message || "Failed to create sale");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateAndDownloadPDF = async (invoice: any, cartItems: CartItem[]) => {
+    try {
+      // Get customer details if not walk-in
+      let customerData = null;
+      if (selectedCustomer !== "walk-in") {
+        const { data } = await supabase
+          .from("customers")
+          .select("*")
+          .eq("id", selectedCustomer)
+          .single();
+        customerData = data;
+      }
+
+      const pdfData = {
+        invoice_number: invoice.invoice_number,
+        invoice_date: invoice.created_at,
+        customer_name: customerData?.name,
+        customer_gstin: customerData?.gstin,
+        customer_address: customerData?.address,
+        items: cartItems.map((item) => ({
+          product_name: item.product_name,
+          qty: item.qty,
+          unit_price: item.unit_price,
+          discount: item.discount,
+          gst_rate: item.gst_rate,
+          line_total: item.line_total,
+        })),
+        sub_total: invoice.sub_total,
+        gst_total: invoice.gst_total,
+        grand_total: invoice.grand_total,
+        payment_mode: invoice.payment_mode,
+        amount_paid: invoice.amount_paid,
+        balance_due: invoice.balance_due,
+      };
+
+      const pdf = generateSalesInvoicePDF(pdfData);
+      pdf.save(`Invoice_${invoice.invoice_number}.pdf`);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to generate PDF");
     }
   };
 
@@ -206,7 +272,23 @@ const NewSale = () => {
           {/* Product Search */}
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle>Products</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Products</CardTitle>
+                <Dialog open={showScanner} onOpenChange={setShowScanner}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Camera className="w-4 h-4 mr-2" />
+                      Scan Barcode
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <BarcodeScanner 
+                      onScan={handleBarcodeScanned} 
+                      onClose={() => setShowScanner(false)} 
+                    />
+                  </DialogContent>
+                </Dialog>
+              </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input

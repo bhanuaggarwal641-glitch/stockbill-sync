@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Plus, Search, Pencil, Package } from "lucide-react";
+import { ArrowLeft, Plus, Search, Pencil, Package, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { BulkImport } from "@/components/BulkImport";
 
 const Products = () => {
   const navigate = useNavigate();
@@ -16,6 +18,7 @@ const Products = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [gstFilter, setGstFilter] = useState<"all" | "gst" | "non-gst">("all");
+  const [showBulkImport, setShowBulkImport] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -68,10 +71,32 @@ const Products = () => {
                 <p className="text-sm text-muted-foreground">Manage your inventory</p>
               </div>
             </div>
-            <Button onClick={() => navigate("/products/new")}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Product
-            </Button>
+            <div className="flex gap-2">
+              <Dialog open={showBulkImport} onOpenChange={setShowBulkImport}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Bulk Import
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Bulk Import Products</DialogTitle>
+                  </DialogHeader>
+                  <BulkImport 
+                    type="products" 
+                    onComplete={() => {
+                      setShowBulkImport(false);
+                      fetchProducts();
+                    }} 
+                  />
+                </DialogContent>
+              </Dialog>
+              <Button onClick={() => navigate("/products/new")}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Product
+              </Button>
+            </div>
           </div>
         </div>
       </header>

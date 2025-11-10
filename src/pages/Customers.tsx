@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { BulkImport } from "@/components/BulkImport";
 
 const Customers = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const Customers = () => {
   const [customers, setCustomers] = useState<any[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<any>(null);
+  const [showBulkImport, setShowBulkImport] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -147,17 +149,38 @@ const Customers = () => {
                 <p className="text-sm text-muted-foreground">Manage customer information</p>
               </div>
             </div>
-            <Dialog open={dialogOpen} onOpenChange={(open) => {
-              setDialogOpen(open);
-              if (!open) resetForm();
-            }}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Customer
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
+            <div className="flex gap-2">
+              <Dialog open={showBulkImport} onOpenChange={setShowBulkImport}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Bulk Import
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Bulk Import Customers</DialogTitle>
+                  </DialogHeader>
+                  <BulkImport 
+                    type="customers" 
+                    onComplete={() => {
+                      setShowBulkImport(false);
+                      fetchCustomers();
+                    }} 
+                  />
+                </DialogContent>
+              </Dialog>
+              <Dialog open={dialogOpen} onOpenChange={(open) => {
+                setDialogOpen(open);
+                if (!open) resetForm();
+              }}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Customer
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
                 <DialogHeader>
                   <DialogTitle>{editingCustomer ? "Edit Customer" : "Add New Customer"}</DialogTitle>
                 </DialogHeader>
@@ -220,6 +243,7 @@ const Customers = () => {
                 </form>
               </DialogContent>
             </Dialog>
+          </div>
           </div>
         </div>
       </header>

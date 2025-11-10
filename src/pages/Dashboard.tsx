@@ -17,7 +17,8 @@ import {
   UserPlus,
   Truck,
   UserCog,
-  CreditCard
+  CreditCard,
+  LineChart
 } from "lucide-react";
 
 const Dashboard = () => {
@@ -227,6 +228,14 @@ const Dashboard = () => {
           >
             <Truck className="w-6 h-6 mr-2" />
             Suppliers
+          </Button>
+          <Button 
+            variant="outline"
+            className="h-20 text-lg font-semibold border-2 bg-gradient-primary text-primary-foreground hover:shadow-glow"
+            onClick={() => navigate("/analytics")}
+          >
+            <LineChart className="w-6 h-6 mr-2" />
+            Analytics
           </Button>
         </div>
 
