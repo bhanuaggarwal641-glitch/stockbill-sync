@@ -29,6 +29,7 @@ const Dashboard = () => {
   const [creditOutstanding, setCreditOutstanding] = useState({ total: 0, count: 0 });
   const [lowStock, setLowStock] = useState(0);
   const [recentSales, setRecentSales] = useState<any[]>([]);
+  const [recentPurchases, setRecentPurchases] = useState<any[]>([]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -106,6 +107,20 @@ const Dashboard = () => {
     
     if (salesData) {
       setRecentSales(salesData);
+    }
+
+    // Recent purchases
+    const { data: purchasesData } = await supabase
+      .from("purchase_invoices")
+      .select(`
+        *,
+        suppliers (name)
+      `)
+      .order("purchase_date", { ascending: false })
+      .limit(5);
+    
+    if (purchasesData) {
+      setRecentPurchases(purchasesData);
     }
   };
 
@@ -356,11 +371,32 @@ const Dashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>No purchases yet</p>
-                <p className="text-sm mt-1">Record purchases to track inventory</p>
-              </div>
+              {recentPurchases.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>No purchases yet</p>
+                  <p className="text-sm mt-1">Record purchases to track inventory</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {recentPurchases.map((purchase) => (
+                    <div key={purchase.id} className="flex justify-between items-center p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{purchase.purchase_number}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {purchase.suppliers?.name || 'Supplier'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">₹{Number(purchase.grand_total).toFixed(2)}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(purchase.purchase_date).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

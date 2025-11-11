@@ -185,6 +185,27 @@ const NewSale = () => {
         }
       }
 
+      // Create credit ledger entry if payment is on credit and there's a balance due
+      if (paymentMode === "Credit" && balanceDue > 0) {
+        const { error: ledgerError } = await supabase
+          .from("credit_ledgers")
+          .insert([
+            {
+              invoice_id: invoice.id,
+              invoice_type: "sale",
+              party_id: selectedCustomer === "walk-in" ? null : selectedCustomer,
+              party_type: "customer",
+              total_amount: grandTotal,
+              paid_amount: paidAmount,
+              balance_amount: balanceDue,
+              status: balanceDue > 0 ? "Open" : "Closed",
+              due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 30 days from now
+            },
+          ]);
+
+        if (ledgerError) throw ledgerError;
+      }
+
       toast.success("Sale created successfully");
       
       // Generate PDF

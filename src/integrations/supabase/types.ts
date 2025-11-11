@@ -51,50 +51,49 @@ export type Database = {
         Relationships: []
       }
       credit_ledgers: {
-        Row: {
-          balance_amount: number
-          created_at: string
-          due_date: string | null
-          id: string
-          invoice_id: string
-          invoice_type: string
-          paid_amount: number
-          party_id: string
-          party_type: string
-          status: string
-          total_amount: number
-          updated_at: string
-        }
-        Insert: {
-          balance_amount: number
-          created_at?: string
-          due_date?: string | null
-          id?: string
-          invoice_id: string
-          invoice_type: string
-          paid_amount?: number
-          party_id: string
-          party_type: string
-          status?: string
-          total_amount: number
-          updated_at?: string
-        }
-        Update: {
-          balance_amount?: number
-          created_at?: string
-          due_date?: string | null
-          id?: string
-          invoice_id?: string
-          invoice_type?: string
-          paid_amount?: number
-          party_id?: string
-          party_type?: string
-          status?: string
-          total_amount?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
+  Row: {
+    id: string;
+    invoice_id: string;
+    invoice_type: string;
+    party_id: string;
+    party_type: string;
+    total_amount: number;
+    paid_amount: number;
+    balance_amount: number;
+    status: string;
+    due_date: string | null;
+    created_at: string;
+    updated_at: string;
+  };
+  Insert: {
+    id?: string;
+    invoice_id: string;
+    invoice_type: string;
+    party_id: string;
+    party_type: string;
+    total_amount: number;
+    paid_amount?: number;
+    balance_amount: number;
+    status: string;
+    due_date?: string | null;
+    created_at?: string;
+    updated_at?: string;
+  };
+  Update: {
+    id?: string;
+    invoice_id?: string;
+    invoice_type?: string;
+    party_id?: string;
+    party_type?: string;
+    total_amount?: number;
+    paid_amount?: number;
+    balance_amount?: number;
+    status?: string;
+    due_date?: string | null;
+    created_at?: string;
+    updated_at?: string;
+  };
+}
       customers: {
         Row: {
           address: string | null
